@@ -6,4 +6,4 @@
 (ER Diagram)[]
 
 ## The link of Sql file attached below contains 9 queries using which we retrieve the lists asked by investors
-(Analysis IG Clone Database)[https://github.com/ukishore33/Analysing-IG-Clone-Database/blob/main/Analysing%20IG%20Clone%20Database%20.sql]
+[Analysis IG Clone Database](https://github.com/ukishore33/Analysing-IG-Clone-Database/blob/main/Analysing%20IG%20Clone%20Database%20.sql)
