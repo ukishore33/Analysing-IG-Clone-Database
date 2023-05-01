@@ -1,9 +1,7 @@
-##### 
+## Analysing IG Clone Database
  * U Kishore
  * B.com
  * Data Analyst
-
-## Analysing IG Clone Database
 
 ### This Project Analyses the IG Clone Database which contains some tables, using which we filter the results asked by the investors
 
