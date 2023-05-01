@@ -1,6 +1,6 @@
 ##### 1) U Kishore
- 2)B.com
- 3)Data Analyst
+ 2) B.com
+ 3) Data Analyst
 
 ## Analysing IG Clone Database
 
