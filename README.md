@@ -1,7 +1,7 @@
 ##### 
- *) U Kishore
- *) B.com
- *) Data Analyst
+ * U Kishore
+ * B.com
+ * Data Analyst
 
 ## Analysing IG Clone Database
 
