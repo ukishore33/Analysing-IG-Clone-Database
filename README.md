@@ -4,6 +4,10 @@
 
 # Analysis of Instagram Clone Dataset using MySQL
 
+The Instagram Dataset which we used for this project is linked below.
+
+[Dataset](https://github.com/ukishore33/Analysing-IG-Clone-Database-using-MySQL/blob/main/ig_clone_db.sql)
+
 The aim of the project was to extract relevant data from the dataset representing a social media platform.
 
 The Instagram Clone dataset was transferred to MySQL using the Import Wizard.
