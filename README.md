@@ -1,8 +1,8 @@
+# Analysis of Instagram Clone Dataset using MySQL
+
 - U Kishore
 - B.com
 - Data Analyst
-
-# Analysis of Instagram Clone Dataset using MySQL
 
 #### The Instagram User Dataset which we used for this project is linked below.
 [Dataset](https://github.com/ukishore33/Analysing-IG-Clone-Database-using-MySQL/blob/main/ig_clone_db.sql)
