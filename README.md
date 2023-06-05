@@ -8,7 +8,7 @@
 [Dataset](https://github.com/ukishore33/Analysing-IG-Clone-Database-using-MySQL/blob/main/ig_clone_db.sql)
 
 #### The link of jpeg file attached below contains ER diagram of the tables used in this project.
-[ER Diagram](https://github.com/ukishore33/Analysing-IG-Clone-Database/blob/main/ER%20Diagram%20of%20IG%20Clone%20Database.jpeg)
+[ER Diagram](https://github.com/ukishore33/Analysing-IG-Clone-Database-using-MySQL/blob/main/ig_clone_db_schema.png)
 
 The aim of the project was to extract relevant data from the dataset representing a social media platform.
 
