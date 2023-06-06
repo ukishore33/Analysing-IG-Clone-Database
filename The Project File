@@ -1,0 +1,1798 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/ukishore33/Analysing-IG-Clone-Database-using-MySQL/blob/main/The%20Project%20File\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "DaTdU9jNNkJI"
+      },
+      "source": [
+        "<p style=\"text-align:center\">\n",
+        "    <a href=\"https://skills.network/?utm_medium=Exinfluencer&utm_source=Exinfluencer&utm_content=000026UJ&utm_term=10006555&utm_id=NA-SkillsNetwork-Channel-SkillsNetworkCoursesIBMDeveloperSkillsNetworkDA0101ENSkillsNetwork20235326-2022-01-01\" target=\"_blank\">\n",
+        "    <img src=\"https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/assets/logos/SN_web_lightmode.png\" width=\"200\" alt=\"Skills Network Logo\"  />\n",
+        "    </a>\n",
+        "</p>\n",
+        "\n",
+        "<h1 align=center><font size = 5>Data Analysis with Python</font></h1>\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "A-yxv4vnNkJK"
+      },
+      "source": [
+        "# House Sales in King County, USA\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "LXsjn8PHNkJK"
+      },
+      "source": [
+        "This dataset contains house sale prices for King County, which includes Seattle. It includes homes sold between May 2014 and May 2015.\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "j1dCMbrWNkJL"
+      },
+      "source": [
+        "| Variable      | Description                                                                                                 |\n",
+        "| ------------- | ----------------------------------------------------------------------------------------------------------- |\n",
+        "| id            | A notation for a house                                                                                      |\n",
+        "| date          | Date house was sold                                                                                         |\n",
+        "| price         | Price is prediction target                                                                                  |\n",
+        "| bedrooms      | Number of bedrooms                                                                                          |\n",
+        "| bathrooms     | Number of bathrooms                                                                                         |\n",
+        "| sqft_living   | Square footage of the home                                                                                  |\n",
+        "| sqft_lot      | Square footage of the lot                                                                                   |\n",
+        "| floors        | Total floors (levels) in house                                                                              |\n",
+        "| waterfront    | House which has a view to a waterfront                                                                      |\n",
+        "| view          | Has been viewed                                                                                             |\n",
+        "| condition     | How good the condition is overall                                                                           |\n",
+        "| grade         | overall grade given to the housing unit, based on King County grading system                                |\n",
+        "| sqft_above    | Square footage of house apart from basement                                                                 |\n",
+        "| sqft_basement | Square footage of the basement                                                                              |\n",
+        "| yr_built      | Built Year                                                                                                  |\n",
+        "| yr_renovated  | Year when house was renovated                                                                               |\n",
+        "| zipcode       | Zip code                                                                                                    |\n",
+        "| lat           | Latitude coordinate                                                                                         |\n",
+        "| long          | Longitude coordinate                                                                                        |\n",
+        "| sqft_living15 | Living room area in 2015(implies-- some renovations) This might or might not have affected the lotsize area |\n",
+        "| sqft_lot15    | LotSize area in 2015(implies-- some renovations)                                                            |\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "0PQLZoeuNkJL",
+        "outputId": "5dadd58d-1fc1-468e-fd8b-072fb617ab00"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Looking in indexes: https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/\n",
+            "Requirement already satisfied: scikit-learn in /usr/local/lib/python3.9/dist-packages (1.2.2)\n",
+            "Requirement already satisfied: numpy>=1.17.3 in /usr/local/lib/python3.9/dist-packages (from scikit-learn) (1.22.4)\n",
+            "Requirement already satisfied: scipy>=1.3.2 in /usr/local/lib/python3.9/dist-packages (from scikit-learn) (1.10.1)\n",
+            "Requirement already satisfied: joblib>=1.1.1 in /usr/local/lib/python3.9/dist-packages (from scikit-learn) (1.1.1)\n",
+            "Requirement already satisfied: threadpoolctl>=2.0.0 in /usr/local/lib/python3.9/dist-packages (from scikit-learn) (3.1.0)\n"
+          ]
+        }
+      ],
+      "source": [
+        "#After executing the below command restart the kernel and run all cells.\n",
+        "!pip3 install scikit-learn --upgrade --user"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "66udTYnFNkJM"
+      },
+      "source": [
+        "You will require the following libraries:\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "-mXC3RdQNkJM"
+      },
+      "outputs": [],
+      "source": [
+        "import pandas as pd\n",
+        "import matplotlib.pyplot as plt\n",
+        "import numpy as np\n",
+        "import seaborn as sns\n",
+        "from sklearn.pipeline import Pipeline\n",
+        "from sklearn.preprocessing import StandardScaler,PolynomialFeatures\n",
+        "from sklearn.linear_model import LinearRegression\n",
+        "%matplotlib inline"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "tw_lfwHfNkJM"
+      },
+      "source": [
+        "# Module 1: Importing Data Sets\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "snf0BESINkJM"
+      },
+      "source": [
+        "Load the csv:\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "jupyter": {
+          "outputs_hidden": false
+        },
+        "id": "R_uYX1nsNkJM"
+      },
+      "outputs": [],
+      "source": [
+        "file_name='https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-DA0101EN-SkillsNetwork/labs/FinalModule_Coursera/data/kc_house_data_NaN.csv'\n",
+        "df=pd.read_csv(file_name)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "pBHKqwczNkJN"
+      },
+      "source": [
+        "We use the method <code>head</code> to display the first 5 columns of the dataframe.\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 317
+        },
+        "id": "rzeo9HRBNkJN",
+        "outputId": "8e3fac77-b555-46de-9fc2-96646458c954"
+      },
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "   Unnamed: 0          id             date     price  bedrooms  bathrooms  \\\n",
+              "0           0  7129300520  20141013T000000  221900.0       3.0       1.00   \n",
+              "1           1  6414100192  20141209T000000  538000.0       3.0       2.25   \n",
+              "2           2  5631500400  20150225T000000  180000.0       2.0       1.00   \n",
+              "3           3  2487200875  20141209T000000  604000.0       4.0       3.00   \n",
+              "4           4  1954400510  20150218T000000  510000.0       3.0       2.00   \n",
+              "\n",
+              "   sqft_living  sqft_lot  floors  waterfront  ...  grade  sqft_above  \\\n",
+              "0         1180      5650     1.0           0  ...      7        1180   \n",
+              "1         2570      7242     2.0           0  ...      7        2170   \n",
+              "2          770     10000     1.0           0  ...      6         770   \n",
+              "3         1960      5000     1.0           0  ...      7        1050   \n",
+              "4         1680      8080     1.0           0  ...      8        1680   \n",
+              "\n",
+              "   sqft_basement  yr_built  yr_renovated  zipcode      lat     long  \\\n",
+              "0              0      1955             0    98178  47.5112 -122.257   \n",
+              "1            400      1951          1991    98125  47.7210 -122.319   \n",
+              "2              0      1933             0    98028  47.7379 -122.233   \n",
+              "3            910      1965             0    98136  47.5208 -122.393   \n",
+              "4              0      1987             0    98074  47.6168 -122.045   \n",
+              "\n",
+              "   sqft_living15  sqft_lot15  \n",
+              "0           1340        5650  \n",
+              "1           1690        7639  \n",
+              "2           2720        8062  \n",
+              "3           1360        5000  \n",
+              "4           1800        7503  \n",
+              "\n",
+              "[5 rows x 22 columns]"
+            ],
+            "text/html": [
+              "\n",
+              "  <div id=\"df-1c0bb106-e2e8-4e3b-a089-bb6d01ca7fb0\">\n",
+              "    <div class=\"colab-df-container\">\n",
+              "      <div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>Unnamed: 0</th>\n",
+              "      <th>id</th>\n",
+              "      <th>date</th>\n",
+              "      <th>price</th>\n",
+              "      <th>bedrooms</th>\n",
+              "      <th>bathrooms</th>\n",
+              "      <th>sqft_living</th>\n",
+              "      <th>sqft_lot</th>\n",
+              "      <th>floors</th>\n",
+              "      <th>waterfront</th>\n",
+              "      <th>...</th>\n",
+              "      <th>grade</th>\n",
+              "      <th>sqft_above</th>\n",
+              "      <th>sqft_basement</th>\n",
+              "      <th>yr_built</th>\n",
+              "      <th>yr_renovated</th>\n",
+              "      <th>zipcode</th>\n",
+              "      <th>lat</th>\n",
+              "      <th>long</th>\n",
+              "      <th>sqft_living15</th>\n",
+              "      <th>sqft_lot15</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>0</td>\n",
+              "      <td>7129300520</td>\n",
+              "      <td>20141013T000000</td>\n",
+              "      <td>221900.0</td>\n",
+              "      <td>3.0</td>\n",
+              "      <td>1.00</td>\n",
+              "      <td>1180</td>\n",
+              "      <td>5650</td>\n",
+              "      <td>1.0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>...</td>\n",
+              "      <td>7</td>\n",
+              "      <td>1180</td>\n",
+              "      <td>0</td>\n",
+              "      <td>1955</td>\n",
+              "      <td>0</td>\n",
+              "      <td>98178</td>\n",
+              "      <td>47.5112</td>\n",
+              "      <td>-122.257</td>\n",
+              "      <td>1340</td>\n",
+              "      <td>5650</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>1</td>\n",
+              "      <td>6414100192</td>\n",
+              "      <td>20141209T000000</td>\n",
+              "      <td>538000.0</td>\n",
+              "      <td>3.0</td>\n",
+              "      <td>2.25</td>\n",
+              "      <td>2570</td>\n",
+              "      <td>7242</td>\n",
+              "      <td>2.0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>...</td>\n",
+              "      <td>7</td>\n",
+              "      <td>2170</td>\n",
+              "      <td>400</td>\n",
+              "      <td>1951</td>\n",
+              "      <td>1991</td>\n",
+              "      <td>98125</td>\n",
+              "      <td>47.7210</td>\n",
+              "      <td>-122.319</td>\n",
+              "      <td>1690</td>\n",
+              "      <td>7639</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>2</td>\n",
+              "      <td>5631500400</td>\n",
+              "      <td>20150225T000000</td>\n",
+              "      <td>180000.0</td>\n",
+              "      <td>2.0</td>\n",
+              "      <td>1.00</td>\n",
+              "      <td>770</td>\n",
+              "      <td>10000</td>\n",
+              "      <td>1.0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>...</td>\n",
+              "      <td>6</td>\n",
+              "      <td>770</td>\n",
+              "      <td>0</td>\n",
+              "      <td>1933</td>\n",
+              "      <td>0</td>\n",
+              "      <td>98028</td>\n",
+              "      <td>47.7379</td>\n",
+              "      <td>-122.233</td>\n",
+              "      <td>2720</td>\n",
+              "      <td>8062</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>3</th>\n",
+              "      <td>3</td>\n",
+              "      <td>2487200875</td>\n",
+              "      <td>20141209T000000</td>\n",
+              "      <td>604000.0</td>\n",
+              "      <td>4.0</td>\n",
+              "      <td>3.00</td>\n",
+              "      <td>1960</td>\n",
+              "      <td>5000</td>\n",
+              "      <td>1.0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>...</td>\n",
+              "      <td>7</td>\n",
+              "      <td>1050</td>\n",
+              "      <td>910</td>\n",
+              "      <td>1965</td>\n",
+              "      <td>0</td>\n",
+              "      <td>98136</td>\n",
+              "      <td>47.5208</td>\n",
+              "      <td>-122.393</td>\n",
+              "      <td>1360</td>\n",
+              "      <td>5000</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>4</th>\n",
+              "      <td>4</td>\n",
+              "      <td>1954400510</td>\n",
+              "      <td>20150218T000000</td>\n",
+              "      <td>510000.0</td>\n",
+              "      <td>3.0</td>\n",
+              "      <td>2.00</td>\n",
+              "      <td>1680</td>\n",
+              "      <td>8080</td>\n",
+              "      <td>1.0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>...</td>\n",
+              "      <td>8</td>\n",
+              "      <td>1680</td>\n",
+              "      <td>0</td>\n",
+              "      <td>1987</td>\n",
+              "      <td>0</td>\n",
+              "      <td>98074</td>\n",
+              "      <td>47.6168</td>\n",
+              "      <td>-122.045</td>\n",
+              "      <td>1800</td>\n",
+              "      <td>7503</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "<p>5 rows × 22 columns</p>\n",
+              "</div>\n",
+              "      <button class=\"colab-df-convert\" onclick=\"convertToInteractive('df-1c0bb106-e2e8-4e3b-a089-bb6d01ca7fb0')\"\n",
+              "              title=\"Convert this dataframe to an interactive table.\"\n",
+              "              style=\"display:none;\">\n",
+              "        \n",
+              "  <svg xmlns=\"http://www.w3.org/2000/svg\" height=\"24px\"viewBox=\"0 0 24 24\"\n",
+              "       width=\"24px\">\n",
+              "    <path d=\"M0 0h24v24H0V0z\" fill=\"none\"/>\n",
+              "    <path d=\"M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z\"/><path d=\"M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z\"/>\n",
+              "  </svg>\n",
+              "      </button>\n",
+              "      \n",
+              "  <style>\n",
+              "    .colab-df-container {\n",
+              "      display:flex;\n",
+              "      flex-wrap:wrap;\n",
+              "      gap: 12px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert {\n",
+              "      background-color: #E8F0FE;\n",
+              "      border: none;\n",
+              "      border-radius: 50%;\n",
+              "      cursor: pointer;\n",
+              "      display: none;\n",
+              "      fill: #1967D2;\n",
+              "      height: 32px;\n",
+              "      padding: 0 0 0 0;\n",
+              "      width: 32px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert:hover {\n",
+              "      background-color: #E2EBFA;\n",
+              "      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);\n",
+              "      fill: #174EA6;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert {\n",
+              "      background-color: #3B4455;\n",
+              "      fill: #D2E3FC;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert:hover {\n",
+              "      background-color: #434B5C;\n",
+              "      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);\n",
+              "      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));\n",
+              "      fill: #FFFFFF;\n",
+              "    }\n",
+              "  </style>\n",
+              "\n",
+              "      <script>\n",
+              "        const buttonEl =\n",
+              "          document.querySelector('#df-1c0bb106-e2e8-4e3b-a089-bb6d01ca7fb0 button.colab-df-convert');\n",
+              "        buttonEl.style.display =\n",
+              "          google.colab.kernel.accessAllowed ? 'block' : 'none';\n",
+              "\n",
+              "        async function convertToInteractive(key) {\n",
+              "          const element = document.querySelector('#df-1c0bb106-e2e8-4e3b-a089-bb6d01ca7fb0');\n",
+              "          const dataTable =\n",
+              "            await google.colab.kernel.invokeFunction('convertToInteractive',\n",
+              "                                                     [key], {});\n",
+              "          if (!dataTable) return;\n",
+              "\n",
+              "          const docLinkHtml = 'Like what you see? Visit the ' +\n",
+              "            '<a target=\"_blank\" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'\n",
+              "            + ' to learn more about interactive tables.';\n",
+              "          element.innerHTML = '';\n",
+              "          dataTable['output_type'] = 'display_data';\n",
+              "          await google.colab.output.renderOutput(dataTable, element);\n",
+              "          const docLink = document.createElement('div');\n",
+              "          docLink.innerHTML = docLinkHtml;\n",
+              "          element.appendChild(docLink);\n",
+              "        }\n",
+              "      </script>\n",
+              "    </div>\n",
+              "  </div>\n",
+              "  "
+            ]
+          },
+          "metadata": {},
+          "execution_count": 4
+        }
+      ],
+      "source": [
+        "df.head()"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "jRlflmllNkJN"
+      },
+      "source": [
+        "### Question 1\n",
+        "\n",
+        "Display the data types of each column using the function dtypes, then take a screenshot and submit it, include your code in the image.\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "jupyter": {
+          "outputs_hidden": false
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "naXL9hFDNkJN",
+        "outputId": "e7211bd1-1799-4575-c37f-b2987ede3f3d"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Unnamed: 0         int64\n",
+            "id                 int64\n",
+            "date              object\n",
+            "price            float64\n",
+            "bedrooms         float64\n",
+            "bathrooms        float64\n",
+            "sqft_living        int64\n",
+            "sqft_lot           int64\n",
+            "floors           float64\n",
+            "waterfront         int64\n",
+            "view               int64\n",
+            "condition          int64\n",
+            "grade              int64\n",
+            "sqft_above         int64\n",
+            "sqft_basement      int64\n",
+            "yr_built           int64\n",
+            "yr_renovated       int64\n",
+            "zipcode            int64\n",
+            "lat              float64\n",
+            "long             float64\n",
+            "sqft_living15      int64\n",
+            "sqft_lot15         int64\n",
+            "dtype: object\n"
+          ]
+        }
+      ],
+      "source": [
+        " print(df.dtypes)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "pNEJ6WGYNkJN"
+      },
+      "source": [
+        "We use the method describe to obtain a statistical summary of the dataframe.\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "jupyter": {
+          "outputs_hidden": false
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 411
+        },
+        "id": "IELICndJNkJN",
+        "outputId": "40e5d5db-1f12-4e0b-af03-00bc748ef1e7"
+      },
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "        Unnamed: 0            id         price      bedrooms     bathrooms  \\\n",
+              "count  21613.00000  2.161300e+04  2.161300e+04  21600.000000  21603.000000   \n",
+              "mean   10806.00000  4.580302e+09  5.400881e+05      3.372870      2.115736   \n",
+              "std     6239.28002  2.876566e+09  3.671272e+05      0.926657      0.768996   \n",
+              "min        0.00000  1.000102e+06  7.500000e+04      1.000000      0.500000   \n",
+              "25%     5403.00000  2.123049e+09  3.219500e+05      3.000000      1.750000   \n",
+              "50%    10806.00000  3.904930e+09  4.500000e+05      3.000000      2.250000   \n",
+              "75%    16209.00000  7.308900e+09  6.450000e+05      4.000000      2.500000   \n",
+              "max    21612.00000  9.900000e+09  7.700000e+06     33.000000      8.000000   \n",
+              "\n",
+              "        sqft_living      sqft_lot        floors    waterfront          view  \\\n",
+              "count  21613.000000  2.161300e+04  21613.000000  21613.000000  21613.000000   \n",
+              "mean    2079.899736  1.510697e+04      1.494309      0.007542      0.234303   \n",
+              "std      918.440897  4.142051e+04      0.539989      0.086517      0.766318   \n",
+              "min      290.000000  5.200000e+02      1.000000      0.000000      0.000000   \n",
+              "25%     1427.000000  5.040000e+03      1.000000      0.000000      0.000000   \n",
+              "50%     1910.000000  7.618000e+03      1.500000      0.000000      0.000000   \n",
+              "75%     2550.000000  1.068800e+04      2.000000      0.000000      0.000000   \n",
+              "max    13540.000000  1.651359e+06      3.500000      1.000000      4.000000   \n",
+              "\n",
+              "       ...         grade    sqft_above  sqft_basement      yr_built  \\\n",
+              "count  ...  21613.000000  21613.000000   21613.000000  21613.000000   \n",
+              "mean   ...      7.656873   1788.390691     291.509045   1971.005136   \n",
+              "std    ...      1.175459    828.090978     442.575043     29.373411   \n",
+              "min    ...      1.000000    290.000000       0.000000   1900.000000   \n",
+              "25%    ...      7.000000   1190.000000       0.000000   1951.000000   \n",
+              "50%    ...      7.000000   1560.000000       0.000000   1975.000000   \n",
+              "75%    ...      8.000000   2210.000000     560.000000   1997.000000   \n",
+              "max    ...     13.000000   9410.000000    4820.000000   2015.000000   \n",
+              "\n",
+              "       yr_renovated       zipcode           lat          long  sqft_living15  \\\n",
+              "count  21613.000000  21613.000000  21613.000000  21613.000000   21613.000000   \n",
+              "mean      84.402258  98077.939805     47.560053   -122.213896    1986.552492   \n",
+              "std      401.679240     53.505026      0.138564      0.140828     685.391304   \n",
+              "min        0.000000  98001.000000     47.155900   -122.519000     399.000000   \n",
+              "25%        0.000000  98033.000000     47.471000   -122.328000    1490.000000   \n",
+              "50%        0.000000  98065.000000     47.571800   -122.230000    1840.000000   \n",
+              "75%        0.000000  98118.000000     47.678000   -122.125000    2360.000000   \n",
+              "max     2015.000000  98199.000000     47.777600   -121.315000    6210.000000   \n",
+              "\n",
+              "          sqft_lot15  \n",
+              "count   21613.000000  \n",
+              "mean    12768.455652  \n",
+              "std     27304.179631  \n",
+              "min       651.000000  \n",
+              "25%      5100.000000  \n",
+              "50%      7620.000000  \n",
+              "75%     10083.000000  \n",
+              "max    871200.000000  \n",
+              "\n",
+              "[8 rows x 21 columns]"
+            ],
+            "text/html": [
+              "\n",
+              "  <div id=\"df-1c9bad2c-3499-4b7a-9573-05bb236e0137\">\n",
+              "    <div class=\"colab-df-container\">\n",
+              "      <div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>Unnamed: 0</th>\n",
+              "      <th>id</th>\n",
+              "      <th>price</th>\n",
+              "      <th>bedrooms</th>\n",
+              "      <th>bathrooms</th>\n",
+              "      <th>sqft_living</th>\n",
+              "      <th>sqft_lot</th>\n",
+              "      <th>floors</th>\n",
+              "      <th>waterfront</th>\n",
+              "      <th>view</th>\n",
+              "      <th>...</th>\n",
+              "      <th>grade</th>\n",
+              "      <th>sqft_above</th>\n",
+              "      <th>sqft_basement</th>\n",
+              "      <th>yr_built</th>\n",
+              "      <th>yr_renovated</th>\n",
+              "      <th>zipcode</th>\n",
+              "      <th>lat</th>\n",
+              "      <th>long</th>\n",
+              "      <th>sqft_living15</th>\n",
+              "      <th>sqft_lot15</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>count</th>\n",
+              "      <td>21613.00000</td>\n",
+              "      <td>2.161300e+04</td>\n",
+              "      <td>2.161300e+04</td>\n",
+              "      <td>21600.000000</td>\n",
+              "      <td>21603.000000</td>\n",
+              "      <td>21613.000000</td>\n",
+              "      <td>2.161300e+04</td>\n",
+              "      <td>21613.000000</td>\n",
+              "      <td>21613.000000</td>\n",
+              "      <td>21613.000000</td>\n",
+              "      <td>...</td>\n",
+              "      <td>21613.000000</td>\n",
+              "      <td>21613.000000</td>\n",
+              "      <td>21613.000000</td>\n",
+              "      <td>21613.000000</td>\n",
+              "      <td>21613.000000</td>\n",
+              "      <td>21613.000000</td>\n",
+              "      <td>21613.000000</td>\n",
+              "      <td>21613.000000</td>\n",
+              "      <td>21613.000000</td>\n",
+              "      <td>21613.000000</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>mean</th>\n",
+              "      <td>10806.00000</td>\n",
+              "      <td>4.580302e+09</td>\n",
+              "      <td>5.400881e+05</td>\n",
+              "      <td>3.372870</td>\n",
+              "      <td>2.115736</td>\n",
+              "      <td>2079.899736</td>\n",
+              "      <td>1.510697e+04</td>\n",
+              "      <td>1.494309</td>\n",
+              "      <td>0.007542</td>\n",
+              "      <td>0.234303</td>\n",
+              "      <td>...</td>\n",
+              "      <td>7.656873</td>\n",
+              "      <td>1788.390691</td>\n",
+              "      <td>291.509045</td>\n",
+              "      <td>1971.005136</td>\n",
+              "      <td>84.402258</td>\n",
+              "      <td>98077.939805</td>\n",
+              "      <td>47.560053</td>\n",
+              "      <td>-122.213896</td>\n",
+              "      <td>1986.552492</td>\n",
+              "      <td>12768.455652</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>std</th>\n",
+              "      <td>6239.28002</td>\n",
+              "      <td>2.876566e+09</td>\n",
+              "      <td>3.671272e+05</td>\n",
+              "      <td>0.926657</td>\n",
+              "      <td>0.768996</td>\n",
+              "      <td>918.440897</td>\n",
+              "      <td>4.142051e+04</td>\n",
+              "      <td>0.539989</td>\n",
+              "      <td>0.086517</td>\n",
+              "      <td>0.766318</td>\n",
+              "      <td>...</td>\n",
+              "      <td>1.175459</td>\n",
+              "      <td>828.090978</td>\n",
+              "      <td>442.575043</td>\n",
+              "      <td>29.373411</td>\n",
+              "      <td>401.679240</td>\n",
+              "      <td>53.505026</td>\n",
+              "      <td>0.138564</td>\n",
+              "      <td>0.140828</td>\n",
+              "      <td>685.391304</td>\n",
+              "      <td>27304.179631</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>min</th>\n",
+              "      <td>0.00000</td>\n",
+              "      <td>1.000102e+06</td>\n",
+              "      <td>7.500000e+04</td>\n",
+              "      <td>1.000000</td>\n",
+              "      <td>0.500000</td>\n",
+              "      <td>290.000000</td>\n",
+              "      <td>5.200000e+02</td>\n",
+              "      <td>1.000000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>...</td>\n",
+              "      <td>1.000000</td>\n",
+              "      <td>290.000000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>1900.000000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>98001.000000</td>\n",
+              "      <td>47.155900</td>\n",
+              "      <td>-122.519000</td>\n",
+              "      <td>399.000000</td>\n",
+              "      <td>651.000000</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>25%</th>\n",
+              "      <td>5403.00000</td>\n",
+              "      <td>2.123049e+09</td>\n",
+              "      <td>3.219500e+05</td>\n",
+              "      <td>3.000000</td>\n",
+              "      <td>1.750000</td>\n",
+              "      <td>1427.000000</td>\n",
+              "      <td>5.040000e+03</td>\n",
+              "      <td>1.000000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>...</td>\n",
+              "      <td>7.000000</td>\n",
+              "      <td>1190.000000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>1951.000000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>98033.000000</td>\n",
+              "      <td>47.471000</td>\n",
+              "      <td>-122.328000</td>\n",
+              "      <td>1490.000000</td>\n",
+              "      <td>5100.000000</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>50%</th>\n",
+              "      <td>10806.00000</td>\n",
+              "      <td>3.904930e+09</td>\n",
+              "      <td>4.500000e+05</td>\n",
+              "      <td>3.000000</td>\n",
+              "      <td>2.250000</td>\n",
+              "      <td>1910.000000</td>\n",
+              "      <td>7.618000e+03</td>\n",
+              "      <td>1.500000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>...</td>\n",
+              "      <td>7.000000</td>\n",
+              "      <td>1560.000000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>1975.000000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>98065.000000</td>\n",
+              "      <td>47.571800</td>\n",
+              "      <td>-122.230000</td>\n",
+              "      <td>1840.000000</td>\n",
+              "      <td>7620.000000</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>75%</th>\n",
+              "      <td>16209.00000</td>\n",
+              "      <td>7.308900e+09</td>\n",
+              "      <td>6.450000e+05</td>\n",
+              "      <td>4.000000</td>\n",
+              "      <td>2.500000</td>\n",
+              "      <td>2550.000000</td>\n",
+              "      <td>1.068800e+04</td>\n",
+              "      <td>2.000000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>...</td>\n",
+              "      <td>8.000000</td>\n",
+              "      <td>2210.000000</td>\n",
+              "      <td>560.000000</td>\n",
+              "      <td>1997.000000</td>\n",
+              "      <td>0.000000</td>\n",
+              "      <td>98118.000000</td>\n",
+              "      <td>47.678000</td>\n",
+              "      <td>-122.125000</td>\n",
+              "      <td>2360.000000</td>\n",
+              "      <td>10083.000000</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>max</th>\n",
+              "      <td>21612.00000</td>\n",
+              "      <td>9.900000e+09</td>\n",
+              "      <td>7.700000e+06</td>\n",
+              "      <td>33.000000</td>\n",
+              "      <td>8.000000</td>\n",
+              "      <td>13540.000000</td>\n",
+              "      <td>1.651359e+06</td>\n",
+              "      <td>3.500000</td>\n",
+              "      <td>1.000000</td>\n",
+              "      <td>4.000000</td>\n",
+              "      <td>...</td>\n",
+              "      <td>13.000000</td>\n",
+              "      <td>9410.000000</td>\n",
+              "      <td>4820.000000</td>\n",
+              "      <td>2015.000000</td>\n",
+              "      <td>2015.000000</td>\n",
+              "      <td>98199.000000</td>\n",
+              "      <td>47.777600</td>\n",
+              "      <td>-121.315000</td>\n",
+              "      <td>6210.000000</td>\n",
+              "      <td>871200.000000</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "<p>8 rows × 21 columns</p>\n",
+              "</div>\n",
+              "      <button class=\"colab-df-convert\" onclick=\"convertToInteractive('df-1c9bad2c-3499-4b7a-9573-05bb236e0137')\"\n",
+              "              title=\"Convert this dataframe to an interactive table.\"\n",
+              "              style=\"display:none;\">\n",
+              "        \n",
+              "  <svg xmlns=\"http://www.w3.org/2000/svg\" height=\"24px\"viewBox=\"0 0 24 24\"\n",
+              "       width=\"24px\">\n",
+              "    <path d=\"M0 0h24v24H0V0z\" fill=\"none\"/>\n",
+              "    <path d=\"M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z\"/><path d=\"M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z\"/>\n",
+              "  </svg>\n",
+              "      </button>\n",
+              "      \n",
+              "  <style>\n",
+              "    .colab-df-container {\n",
+              "      display:flex;\n",
+              "      flex-wrap:wrap;\n",
+              "      gap: 12px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert {\n",
+              "      background-color: #E8F0FE;\n",
+              "      border: none;\n",
+              "      border-radius: 50%;\n",
+              "      cursor: pointer;\n",
+              "      display: none;\n",
+              "      fill: #1967D2;\n",
+              "      height: 32px;\n",
+              "      padding: 0 0 0 0;\n",
+              "      width: 32px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert:hover {\n",
+              "      background-color: #E2EBFA;\n",
+              "      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);\n",
+              "      fill: #174EA6;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert {\n",
+              "      background-color: #3B4455;\n",
+              "      fill: #D2E3FC;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert:hover {\n",
+              "      background-color: #434B5C;\n",
+              "      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);\n",
+              "      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));\n",
+              "      fill: #FFFFFF;\n",
+              "    }\n",
+              "  </style>\n",
+              "\n",
+              "      <script>\n",
+              "        const buttonEl =\n",
+              "          document.querySelector('#df-1c9bad2c-3499-4b7a-9573-05bb236e0137 button.colab-df-convert');\n",
+              "        buttonEl.style.display =\n",
+              "          google.colab.kernel.accessAllowed ? 'block' : 'none';\n",
+              "\n",
+              "        async function convertToInteractive(key) {\n",
+              "          const element = document.querySelector('#df-1c9bad2c-3499-4b7a-9573-05bb236e0137');\n",
+              "          const dataTable =\n",
+              "            await google.colab.kernel.invokeFunction('convertToInteractive',\n",
+              "                                                     [key], {});\n",
+              "          if (!dataTable) return;\n",
+              "\n",
+              "          const docLinkHtml = 'Like what you see? Visit the ' +\n",
+              "            '<a target=\"_blank\" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'\n",
+              "            + ' to learn more about interactive tables.';\n",
+              "          element.innerHTML = '';\n",
+              "          dataTable['output_type'] = 'display_data';\n",
+              "          await google.colab.output.renderOutput(dataTable, element);\n",
+              "          const docLink = document.createElement('div');\n",
+              "          docLink.innerHTML = docLinkHtml;\n",
+              "          element.appendChild(docLink);\n",
+              "        }\n",
+              "      </script>\n",
+              "    </div>\n",
+              "  </div>\n",
+              "  "
+            ]
+          },
+          "metadata": {},
+          "execution_count": 6
+        }
+      ],
+      "source": [
+        "df.describe()"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "5OKNII-iNkJN"
+      },
+      "source": [
+        "# Module 2: Data Wrangling\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "3eliVLrBNkJN"
+      },
+      "source": [
+        "### Question 2\n",
+        "\n",
+        "Drop the columns <code>\"id\"</code>  and <code>\"Unnamed: 0\"</code> from axis 1 using the method <code>drop()</code>, then use the method <code>describe()</code> to obtain a statistical summary of the data. Take a screenshot and submit it, make sure the <code>inplace</code> parameter is set to <code>True</code>\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "jupyter": {
+          "outputs_hidden": false
+        },
+        "id": "Tk-De_ABNkJN"
+      },
+      "outputs": [],
+      "source": [
+        "\n",
+        "df.drop(['id','Unnamed: 0'],axis=1,inplace=True)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "vxpoCDnENkJN"
+      },
+      "source": [
+        "We can see we have missing values for the columns <code> bedrooms</code>  and <code> bathrooms </code>\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "jupyter": {
+          "outputs_hidden": false
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "T-Iccgi7NkJN",
+        "outputId": "d6d024b3-e94a-4694-db76-d2b81524c5e3"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "number of NaN values for the column bedrooms : 13\n",
+            "number of NaN values for the column bathrooms : 10\n"
+          ]
+        }
+      ],
+      "source": [
+        "print(\"number of NaN values for the column bedrooms :\", df['bedrooms'].isnull().sum())\n",
+        "print(\"number of NaN values for the column bathrooms :\", df['bathrooms'].isnull().sum())\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "5tX3gcNaNkJO"
+      },
+      "source": [
+        "We can replace the missing values of the column <code>'bedrooms'</code> with the mean of the column  <code>'bedrooms' </code> using the method <code>replace()</code>. Don't forget to set the <code>inplace</code> parameter to <code>True</code>\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "gVqeifu9NkJO"
+      },
+      "outputs": [],
+      "source": [
+        "mean=df['bedrooms'].mean()\n",
+        "df['bedrooms'].replace(np.nan,mean, inplace=True)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "3cQo9rKPNkJO"
+      },
+      "source": [
+        "We also replace the missing values of the column <code>'bathrooms'</code> with the mean of the column  <code>'bathrooms' </code> using the method <code>replace()</code>. Don't forget to set the <code> inplace </code>  parameter top <code> True </code>\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "aTocXBssNkJO"
+      },
+      "outputs": [],
+      "source": [
+        "mean=df['bathrooms'].mean()\n",
+        "df['bathrooms'].replace(np.nan,mean, inplace=True)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "jupyter": {
+          "outputs_hidden": false
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "WffjyjT_NkJO",
+        "outputId": "40568bee-d47b-4e6e-fdd8-d8be51f601de"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "number of NaN values for the column bedrooms : 0\n",
+            "number of NaN values for the column bathrooms : 0\n"
+          ]
+        }
+      ],
+      "source": [
+        "print(\"number of NaN values for the column bedrooms :\", df['bedrooms'].isnull().sum())\n",
+        "print(\"number of NaN values for the column bathrooms :\", df['bathrooms'].isnull().sum())"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "2pz5HFwRNkJO"
+      },
+      "source": [
+        "# Module 3: Exploratory Data Analysis\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "sSSjLPQENkJO"
+      },
+      "source": [
+        "### Question 3\n",
+        "\n",
+        "Use the method <code>value_counts</code> to count the number of houses with unique floor values, use the method <code>.to_frame()</code> to convert it to a dataframe.\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "jupyter": {
+          "outputs_hidden": false
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "7ZzAdIhGNkJO",
+        "outputId": "2fb857e3-b22d-4cae-ddee-a868512f02b8"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "     floors\n",
+            "1.0   10680\n",
+            "2.0    8241\n",
+            "1.5    1910\n",
+            "3.0     613\n",
+            "2.5     161\n",
+            "3.5       8\n"
+          ]
+        }
+      ],
+      "source": [
+        "sr = df['floors'].value_counts().to_frame()\n",
+        "print(sr)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "lly2AmlkNkJO"
+      },
+      "source": [
+        "### Question 4\n",
+        "\n",
+        "Use the function <code>boxplot</code> in the seaborn library  to  determine whether houses with a waterfront view or without a waterfront view have more price outliers.\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "jupyter": {
+          "outputs_hidden": false
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 363
+        },
+        "id": "vEBhWi0sNkJO",
+        "outputId": "6f2fe643-8e39-40c2-9207-ff413226770a"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "/usr/local/lib/python3.9/dist-packages/seaborn/_decorators.py:36: FutureWarning: Pass the following variables as keyword args: x, y. From version 0.12, the only valid positional argument will be `data`, and passing other arguments without an explicit keyword will result in an error or misinterpretation.\n",
+            "  warnings.warn(\n"
+          ]
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<AxesSubplot:xlabel='waterfront', ylabel='price'>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 13
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<Figure size 432x288 with 1 Axes>"
+            ],
+            "image/png": "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\n"
+          },
+          "metadata": {
+            "needs_background": "light"
+          }
+        }
+      ],
+      "source": [
+        "sns.boxplot(df['waterfront'],df['price'])"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "-FHM0v6TNkJO"
+      },
+      "source": [
+        "### Question 5\n",
+        "\n",
+        "Use the function <code>regplot</code>  in the seaborn library  to  determine if the feature <code>sqft_above</code> is negatively or positively correlated with price.\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "jupyter": {
+          "outputs_hidden": false
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 309
+        },
+        "id": "6VHuNsDHNkJO",
+        "outputId": "1ef0fd67-b2e5-4e35-e957-7d08f9471c17"
+      },
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "(0.0, 8081250.0)"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 14
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<Figure size 432x288 with 1 Axes>"
+            ],
+            "image/png": "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\n"
+          },
+          "metadata": {
+            "needs_background": "light"
+          }
+        }
+      ],
+      "source": [
+        "sns.regplot(x='sqft_above', y='price',data=df)\n",
+        "plt.ylim(0,)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "LYAXQl1jNkJO"
+      },
+      "source": [
+        "We can use the Pandas method <code>corr()</code>  to find the feature other than price that is most correlated with price.\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "jupyter": {
+          "outputs_hidden": false
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "S-dkbsAANkJO",
+        "outputId": "707f540e-f9d7-4431-86e5-a24790bc22db"
+      },
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "zipcode         -0.053203\n",
+              "long             0.021626\n",
+              "condition        0.036362\n",
+              "yr_built         0.054012\n",
+              "sqft_lot15       0.082447\n",
+              "sqft_lot         0.089661\n",
+              "yr_renovated     0.126434\n",
+              "floors           0.256794\n",
+              "waterfront       0.266369\n",
+              "lat              0.307003\n",
+              "bedrooms         0.308797\n",
+              "sqft_basement    0.323816\n",
+              "view             0.397293\n",
+              "bathrooms        0.525738\n",
+              "sqft_living15    0.585379\n",
+              "sqft_above       0.605567\n",
+              "grade            0.667434\n",
+              "sqft_living      0.702035\n",
+              "price            1.000000\n",
+              "Name: price, dtype: float64"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 15
+        }
+      ],
+      "source": [
+        "df.corr()['price'].sort_values()"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "3p3cttNiNkJP"
+      },
+      "source": [
+        "# Module 4: Model Development\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "dt3pyiejNkJP"
+      },
+      "source": [
+        "We can Fit a linear regression model using the  longitude feature <code>'long'</code> and  caculate the R^2.\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "jupyter": {
+          "outputs_hidden": false
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "XqUV3ud-NkJP",
+        "outputId": "86b6af12-077d-4b22-a902-2a474c554264"
+      },
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "0.00046769430149007363"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 16
+        }
+      ],
+      "source": [
+        "X = df[['long']]\n",
+        "Y = df['price']\n",
+        "lm = LinearRegression()\n",
+        "lm.fit(X,Y)\n",
+        "lm.score(X, Y)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "1hp0qy66NkJP"
+      },
+      "source": [
+        "### Question  6\n",
+        "\n",
+        "Fit a linear regression model to predict the <code>'price'</code> using the feature <code>'sqft_living'</code> then calculate the R^2. Take a screenshot of your code and the value of the R^2.\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "jupyter": {
+          "outputs_hidden": false
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "FBy3OnNhNkJP",
+        "outputId": "83fa1fbe-02a5-4207-96b2-876f1e9f18fe"
+      },
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "0.4928532179037931"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 17
+        }
+      ],
+      "source": [
+        "X = df[['sqft_living']]\n",
+        "Y = df['price']\n",
+        "lm = LinearRegression()\n",
+        "lm\n",
+        "lm.fit(X,Y)\n",
+        "lm.score(X, Y)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "UTVYlJGhNkJP"
+      },
+      "source": [
+        "### Question 7\n",
+        "\n",
+        "Fit a linear regression model to predict the <code>'price'</code> using the list of features:\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "ObLwmS2JNkJP"
+      },
+      "outputs": [],
+      "source": [
+        "features =[\"floors\", \"waterfront\",\"lat\" ,\"bedrooms\" ,\"sqft_basement\" ,\"view\" ,\"bathrooms\",\"sqft_living15\",\"sqft_above\",\"grade\",\"sqft_living\"]     "
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "JE0go7P5NkJP"
+      },
+      "source": [
+        "Then calculate the R^2. Take a screenshot of your code.\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "jupyter": {
+          "outputs_hidden": false
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "0W79dwp9NkJP",
+        "outputId": "9cfe6bae-d042-445e-cc00-f789af19783d"
+      },
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "0.6576722447699446"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 19
+        }
+      ],
+      "source": [
+        "features =[\"floors\", \"waterfront\",\"lat\" ,\"bedrooms\" ,\"sqft_basement\" ,\"view\" ,\"bathrooms\",\"sqft_living15\",\"sqft_above\",\"grade\",\"sqft_living\"]     \n",
+        "X = df[[\"floors\", \"waterfront\",\"lat\" ,\"bedrooms\" ,\"sqft_basement\" ,\"view\" ,\"bathrooms\",\"sqft_living15\",\"sqft_above\",\"grade\",\"sqft_living\"]]\n",
+        "Y = df['price']\n",
+        "lm2 = LinearRegression()\n",
+        "lm2\n",
+        "lm2.fit(X,Y)\n",
+        "lm2.score(X, Y)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "tDaI4TaWNkJP"
+      },
+      "source": [
+        "### This will help with Question 8\n",
+        "\n",
+        "Create a list of tuples, the first element in the tuple contains the name of the estimator:\n",
+        "\n",
+        "<code>'scale'</code>\n",
+        "\n",
+        "<code>'polynomial'</code>\n",
+        "\n",
+        "<code>'model'</code>\n",
+        "\n",
+        "The second element in the tuple  contains the model constructor\n",
+        "\n",
+        "<code>StandardScaler()</code>\n",
+        "\n",
+        "<code>PolynomialFeatures(include_bias=False)</code>\n",
+        "\n",
+        "<code>LinearRegression()</code>\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "dvpsDfhFNkJP"
+      },
+      "outputs": [],
+      "source": [
+        "Input=[('scale',StandardScaler()),('polynomial', PolynomialFeatures(include_bias=False)),('model',LinearRegression())]"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "83QdlxV-NkJP"
+      },
+      "source": [
+        "### Question 8\n",
+        "\n",
+        "Use the list to create a pipeline object to predict the 'price', fit the object using the features in the list <code>features</code>, and calculate the R^2.\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "jupyter": {
+          "outputs_hidden": false
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "icx2uB-INkJP",
+        "outputId": "805ca0f2-bc2e-4cfb-827e-818a7460ac78"
+      },
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "0.7513410648797747"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 23
+        }
+      ],
+      "source": [
+        "pipe=Pipeline(Input)\n",
+        "pipe.fit(X,Y)\n",
+        "pipe.score(X,Y)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "1P54okYENkJQ"
+      },
+      "source": [
+        "# Module 5: Model Evaluation and Refinement\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "Jlnmoh_DNkJQ"
+      },
+      "source": [
+        "Import the necessary modules:\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "jupyter": {
+          "outputs_hidden": false
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "TXRBdo70NkJQ",
+        "outputId": "e1adfbe1-808a-47c3-fffb-e8b05a71780d"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "done\n"
+          ]
+        }
+      ],
+      "source": [
+        "from sklearn.model_selection import cross_val_score\n",
+        "from sklearn.model_selection import train_test_split\n",
+        "print(\"done\")"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "M1poBBkJNkJQ"
+      },
+      "source": [
+        "We will split the data into training and testing sets:\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "jupyter": {
+          "outputs_hidden": false
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "boVwi4ZgNkJQ",
+        "outputId": "a37f1096-6406-43f1-d8ae-d4a7feb12160"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "number of test samples: 3242\n",
+            "number of training samples: 18371\n"
+          ]
+        }
+      ],
+      "source": [
+        "features =[\"floors\", \"waterfront\",\"lat\" ,\"bedrooms\" ,\"sqft_basement\" ,\"view\" ,\"bathrooms\",\"sqft_living15\",\"sqft_above\",\"grade\",\"sqft_living\"]    \n",
+        "X = df[features]\n",
+        "Y = df['price']\n",
+        "\n",
+        "x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.15, random_state=1)\n",
+        "\n",
+        "\n",
+        "print(\"number of test samples:\", x_test.shape[0])\n",
+        "print(\"number of training samples:\",x_train.shape[0])"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "GX70kMBINkJQ"
+      },
+      "source": [
+        "### Question 9\n",
+        "\n",
+        "Create and fit a Ridge regression object using the training data, set the regularization parameter to 0.1, and calculate the R^2 using the test data.\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "VefdwX-VNkJQ"
+      },
+      "outputs": [],
+      "source": [
+        "from sklearn.linear_model import Ridge"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "jupyter": {
+          "outputs_hidden": false
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "PK4wBTsMNkJQ",
+        "outputId": "a76bb0e5-dd08-48d6-e2f9-dea5ae877e20"
+      },
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "0.6478759163939112"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 27
+        }
+      ],
+      "source": [
+        "Rig = Ridge(alpha=0.1)\n",
+        "Rig.fit(x_train,y_train)\n",
+        "Rig.score(x_test,y_test)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "yjr285IVNkJQ"
+      },
+      "source": [
+        "### Question 10\n",
+        "\n",
+        "Perform a second order polynomial transform on both the training data and testing data. Create and fit a Ridge regression object using the training data, set the regularisation parameter to 0.1, and calculate the R^2 utilising the test data provided. Take a screenshot of your code and the R^2.\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "jupyter": {
+          "outputs_hidden": false
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "ydGI0RtPNkJQ",
+        "outputId": "98d417f2-e29d-4e51-f927-1b20edde5923"
+      },
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "0.700274426790608"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 28
+        }
+      ],
+      "source": [
+        "pf = PolynomialFeatures(degree=2)\n",
+        "x_train_pf = pf.fit_transform(x_train)\n",
+        "x_test_pf = pf.fit_transform(x_test)\n",
+        "rig = Ridge(alpha=0.1)\n",
+        "rig.fit(x_train_pf,y_train)\n",
+        "rig.score(x_test_pf,y_test)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "hRJD72ENNkJQ"
+      },
+      "source": [
+        "<h2>About the Authors:</h2> \n",
+        "\n",
+        "<a href=\"https://www.linkedin.com/in/joseph-s-50398b136/?utm_medium=Exinfluencer&utm_source=Exinfluencer&utm_content=000026UJ&utm_term=10006555&utm_id=NA-SkillsNetwork-Channel-SkillsNetworkCoursesIBMDeveloperSkillsNetworkDA0101ENSkillsNetwork20235326-2022-01-01\">Joseph Santarcangelo</a> has a PhD in Electrical Engineering, his research focused on using machine learning, signal processing, and computer vision to determine how videos impact human cognition. Joseph has been working for IBM since he completed his PhD.\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "bkVTXS5GNkJQ"
+      },
+      "source": [
+        "Other contributors: <a href=\"https://www.linkedin.com/in/michelleccarey/?utm_medium=Exinfluencer&utm_source=Exinfluencer&utm_content=000026UJ&utm_term=10006555&utm_id=NA-SkillsNetwork-Channel-SkillsNetworkCoursesIBMDeveloperSkillsNetworkDA0101ENSkillsNetwork20235326-2022-01-01\">Michelle Carey</a>, <a href=\"https://www.linkedin.com/in/jiahui-mavis-zhou-a4537814a?utm_medium=Exinfluencer&utm_source=Exinfluencer&utm_content=000026UJ&utm_term=10006555&utm_id=NA-SkillsNetwork-Channel-SkillsNetworkCoursesIBMDeveloperSkillsNetworkDA0101ENSkillsNetwork20235326-2022-01-01\">Mavis Zhou</a>\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "sHP9SpLKNkJQ"
+      },
+      "source": [
+        "## Change Log\n",
+        "\n",
+        "| Date (YYYY-MM-DD) | Version | Changed By      | Change Description                           |\n",
+        "| ----------------- | ------- | --------------- | -------------------------------------------- |\n",
+        "| 2022-07-29        | 2.3     | Lakshmi Holla | Added library import |\n",
+        "| 2020-12-01        | 2.2     | Aije Egwaikhide | Coverted Data describtion from text to table |\n",
+        "| 2020-10-06        | 2.1     | Lakshmi Holla   | Changed markdown instruction of Question1    |\n",
+        "| 2020-08-27        | 2.0     | Malika Singla   | Added lab to GitLab                          |\n",
+        "\n",
+        "<hr>\n",
+        "\n",
+        "## <h3 align=\"center\"> © IBM Corporation 2020. All rights reserved. <h3/>\n",
+        "\n",
+        "<p>\n"
+      ]
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "display_name": "Python",
+      "language": "python",
+      "name": "conda-env-python-py"
+    },
+    "language_info": {
+      "name": ""
+    },
+    "colab": {
+      "provenance": [],
+      "include_colab_link": true
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 0
+}
